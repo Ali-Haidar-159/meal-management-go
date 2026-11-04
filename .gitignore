@@ -1,0 +1,20 @@
+# Environment configuration
+.env
+.env.*
+!.env.example
+
+# Runtime data
+users.json
+localstorage.txt
+
+# Go build and test outputs
+/playground
+/playground.exe
+*.test
+*.out
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

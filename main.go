@@ -73,13 +73,15 @@ home:
 			fmt.Println(errLogin)
 		} else {
 			fmt.Println("Login Successful")
+		dashboard:
 			go utils.UserDashboard(reader, chanelDashboard)
 			choice := <-chanelDashboard
 			modules.DashboardHandler(choice)
+			goto dashboard
 		}
 
 	case "0":
-		fmt.Println("Logout Successful")
+		fmt.Println("Exit From App Successfully")
 		break
 	default:
 		fmt.Println("Enter a right command!")

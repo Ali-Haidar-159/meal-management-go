@@ -77,7 +77,11 @@ home:
 			go utils.UserDashboard(reader, chanelDashboard)
 			choice := <-chanelDashboard
 			modules.DashboardHandler(choice)
-			goto dashboard
+			if choice != "0" {
+				goto dashboard
+			} else {
+				goto home
+			}
 		}
 
 	case "0":

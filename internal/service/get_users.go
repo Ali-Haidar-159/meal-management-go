@@ -1,13 +1,13 @@
-package modules
+package service
 
 import (
 	"encoding/json"
 	"os"
 
-	"ali.com/playground/utils"
+	"ali.com/playground/internal/domain"
 )
 
-func GetAllUsers(file string) ([]utils.Person, error) {
+func GetAllUsers(file string) ([]domain.Person, error) {
 
 	data, err := os.ReadFile(file)
 
@@ -15,7 +15,7 @@ func GetAllUsers(file string) ([]utils.Person, error) {
 		return nil, err
 	}
 
-	var users []utils.Person
+	var users []domain.Person
 
 	err = json.Unmarshal(data, &users)
 

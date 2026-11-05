@@ -4,12 +4,14 @@
 !.env.example
 
 # Runtime data
-users.json
-localstorage.txt
+*.json
+*.txt
 
 # Go build and test outputs
 /playground
 /playground.exe
+/meal-management
+/meal-management.exe
 *.test
 *.out
 

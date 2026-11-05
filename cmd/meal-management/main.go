@@ -4,19 +4,19 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
-	"ali.com/playground/modules"
-	"ali.com/playground/utils"
+	"ali.com/playground/internal/cli"
+	"ali.com/playground/internal/domain"
+	"ali.com/playground/internal/service"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 
-	// CONFIGURATION
-	errToLoad := godotenv.Load()
-	if errToLoad != nil {
-		fmt.Println("Error loading .env file:", errToLoad)
+	if err := loadConfig(); err != nil {
+		fmt.Println("Error loading configuration:", err)
 		return
 	}
 
@@ -30,7 +30,7 @@ func main() {
 
 	// MAIN WORK
 home:
-	go utils.HomePageShow(reader, chanelHome)
+	go cli.HomePageShow(reader, chanelHome)
 	goal := <-chanelHome
 
 	switch goal {
@@ -48,13 +48,13 @@ home:
 			return
 		}
 
-		person := utils.Person{
-			Id:         modules.CreateId(),
+		person := domain.Person{
+			Id:         service.CreateId(),
 			UserName:   strings.TrimSpace(username),
 			Password:   strings.TrimSpace(password),
 			Department: strings.TrimSpace(department),
 		}
-		go modules.WriteFile(os.Getenv("USERS_FILE"), person, chanelErrWriteFunc)
+		go service.WriteFile(os.Getenv("USERS_FILE"), person, chanelErrWriteFunc)
 
 		err1 := <-chanelErrWriteFunc
 		if err1 != nil {
@@ -66,7 +66,7 @@ home:
 		goto home
 
 	case "2":
-		go modules.Login(chanelLoginFunc)
+		go service.Login(chanelLoginFunc)
 		errLogin := <-chanelLoginFunc
 
 		if errLogin != nil {
@@ -74,9 +74,9 @@ home:
 		} else {
 			fmt.Println("Login Successful")
 		dashboard:
-			go utils.UserDashboard(reader, chanelDashboard)
+			go cli.UserDashboard(reader, chanelDashboard)
 			choice := <-chanelDashboard
-			modules.DashboardHandler(choice)
+			service.DashboardHandler(choice)
 			if choice != "0" {
 				goto dashboard
 			} else {
@@ -90,5 +90,30 @@ home:
 	default:
 		fmt.Println("Enter a right command!")
 		goto home
+	}
+}
+
+func loadConfig() error {
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	for {
+		envPath := filepath.Join(dir, ".env")
+		if _, err := os.Stat(envPath); err == nil {
+			if err := godotenv.Load(envPath); err != nil {
+				return err
+			}
+			return os.Chdir(dir)
+		} else if !os.IsNotExist(err) {
+			return err
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return fmt.Errorf(".env file not found in the current directory or any parent directory")
+		}
+		dir = parent
 	}
 }
